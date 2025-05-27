@@ -1,0 +1,18 @@
+# FastAPI and server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Machine Learning (exact versions from research repo)
+xgboost==3.0.2
+scikit-learn==1.6.1
+joblib==1.5.1
+
+# Data Science (exact versions from research repo)
+numpy==2.2.6
+pandas==2.2.3
+
+# Testing
+pytest==7.4.3
+httpx==0.25.2
