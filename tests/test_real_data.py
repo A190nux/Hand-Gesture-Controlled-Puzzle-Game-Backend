@@ -5,7 +5,7 @@ import time
 from typing import List, Dict
 import numpy as np
 
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "http://0.0.0.0:8000"
 
 def load_test_data(csv_path: str = "tests/hand_landmarks_data.csv") -> pd.DataFrame:
     """Load the real hand landmarks data."""

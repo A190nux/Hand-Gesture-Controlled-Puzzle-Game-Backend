@@ -9,7 +9,7 @@ rule_files:
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['0.0.0.0:9090']
 
   - job_name: 'hand-gesture-api'
     static_configs:

@@ -26,20 +26,20 @@ docker-compose ps
 
 # Test API health
 echo "🏥 Testing API health..."
-curl -s http://localhost:8000/health | jq .
+curl -s http://0.0.0.0:8000/health | jq .
 
 # Test Prometheus
 echo "📊 Testing Prometheus..."
-curl -s http://localhost:9090/-/healthy
+curl -s http://0.0.0.0:9090/-/healthy
 
 echo "✅ Monitoring stack setup complete!"
 echo ""
 echo "🌐 Access URLs:"
-echo "  - API: http://localhost:8000"
-echo "  - API Docs: http://localhost:8000/docs"
-echo "  - Prometheus: http://localhost:9090"
-echo "  - Grafana: http://localhost:3000 (admin/admin123)"
-echo "  - Metrics: http://localhost:8000/metrics"
+echo "  - API: http://0.0.0.0:8000"
+echo "  - API Docs: http://0.0.0.0:8000/docs"
+echo "  - Prometheus: http://0.0.0.0:9090"
+echo "  - Grafana: http://0.0.0.0:3000 (admin/admin123)"
+echo "  - Metrics: http://0.0.0.0:8000/metrics"
 echo ""
 echo "📈 To run load test:"
 echo "  python tests/load_test.py"

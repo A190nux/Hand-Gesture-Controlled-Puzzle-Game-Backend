@@ -5,7 +5,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 import json
 
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "http://0.0.0.0:8000"
 
 def generate_random_landmarks():
     """Generate random hand landmarks for testing."""

@@ -51,8 +51,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ## API Usage
 
 ### Base URL
-- Local: `http://localhost:8000`
-- Docker: `http://localhost:8000`
+- Local: `http://0.0.0.0:8000`
+- Docker: `http://0.0.0.0:8000`
 
 ### Endpoints
 
@@ -100,7 +100,7 @@ GET /model/info
 ```
 
 ### Interactive Documentation
-Visit `http://localhost:8000/docs` for Swagger UI documentation.
+Visit `http://0.0.0.0:8000/docs` for Swagger UI documentation.
 
 ## Landmark Format
 
