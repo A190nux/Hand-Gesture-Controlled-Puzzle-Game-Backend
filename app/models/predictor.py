@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Tuple, List
 import logging
 import json
-from app.utils.preprocessing import extract_xy_coords
+from app.utils.preprocessing import extract_xyz_coords  # CHANGED: Use XYZ instead of XY
 from app.schemas.request_response import LandmarkPoint
 
 logger = logging.getLogger(__name__)
@@ -126,11 +126,13 @@ class GesturePredictor:
             raise RuntimeError("Model not loaded. Call load_model() first.")
         
         try:
-            # Extract and preprocess coordinates
-            coords = extract_xy_coords(landmarks)
+            # CHANGED: Extract and preprocess coordinates using XYZ (63 features)
+            coords = extract_xyz_coords(landmarks)
             
             # Reshape for prediction (1 sample)
             X = coords.reshape(1, -1)
+            
+            logger.info(f"Input shape: {X.shape}, Expected features: 63")
             
             # Get prediction probabilities
             probabilities = self.model.predict_proba(X)[0]
@@ -162,7 +164,7 @@ class GesturePredictor:
             "model_type": "XGBoost",
             "num_classes": len(self.class_names),
             "classes": self.class_names,
-            "feature_dim": 42  # 21 landmarks * 2 coordinates (x, y)
+            "feature_dim": 63  # CHANGED: 21 landmarks * 3 coordinates (x, y, z)
         }
         
         # Add additional info if available

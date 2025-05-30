@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 import time
 import logging
 from contextlib import asynccontextmanager
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.models.predictor import GesturePredictor
 from app.schemas.request_response import (
@@ -13,10 +14,14 @@ from app.schemas.request_response import (
     ErrorResponse
 )
 from app.utils.preprocessing import validate_landmarks
+from app.monitoring.metrics import metrics_collector
 from datetime import datetime
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging with more detail
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Global predictor instance
@@ -30,10 +35,11 @@ async def lifespan(app: FastAPI):
     try:
         predictor = GesturePredictor()
         predictor.load_model()
+        metrics_collector.update_model_status(True)
         logger.info("✅ Model loaded successfully on startup")
     except Exception as e:
         logger.error(f"❌ Failed to load model on startup: {e}")
-        # You might want to exit here or continue without model
+        metrics_collector.update_model_status(False)
         
     yield
     
@@ -57,6 +63,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize Prometheus instrumentator
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
 @app.get("/", response_model=dict)
 async def root():
     """Root endpoint with API information."""
@@ -64,15 +74,19 @@ async def root():
         "message": "Hand Gesture Recognition API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "metrics": "/metrics"
     }
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
     """Health check endpoint."""
+    is_loaded = predictor is not None and getattr(predictor, 'is_loaded', False)
+    metrics_collector.update_model_status(is_loaded)
+    
     return HealthResponse(
         status="healthy",
-        model_loaded=predictor is not None and getattr(predictor, 'is_loaded', False),
+        model_loaded=is_loaded,
         timestamp=datetime.now().isoformat()
     )
 
@@ -88,6 +102,9 @@ async def predict_gesture(request: HandLandmarksRequest):
         PredictionResponse with gesture prediction and confidence
     """
     global predictor
+    
+    # Record the request
+    metrics_collector.record_request()
     
     if predictor is None or not predictor.is_loaded:
         raise HTTPException(
@@ -105,16 +122,26 @@ async def predict_gesture(request: HandLandmarksRequest):
     try:
         start_time = time.time()
         
+        # Record landmark statistics
+        metrics_collector.record_landmark_stats(request.landmarks)
+        
         # Make prediction
         gesture, confidence, probabilities = predictor.predict(request.landmarks)
         
-        processing_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+        # Calculate processing time
+        processing_time = time.time() - start_time
+        
+        # Record metrics
+        metrics_collector.record_prediction_time(processing_time)
+        metrics_collector.record_prediction_result(gesture, confidence)
+        
+        processing_time_ms = processing_time * 1000  # Convert to milliseconds
         
         return PredictionResponse(
             gesture=gesture,
             confidence=confidence,
             probabilities=probabilities,
-            processing_time_ms=round(processing_time, 2)
+            processing_time_ms=round(processing_time_ms, 2)
         )
         
     except Exception as e:
@@ -169,7 +196,7 @@ async def general_exception_handler(request, exc):
         content=ErrorResponse(
             error="Internal server error",
             detail=str(exc)
-        ).dict()
+        ).model_dump()
     )
 
 if __name__ == "__main__":

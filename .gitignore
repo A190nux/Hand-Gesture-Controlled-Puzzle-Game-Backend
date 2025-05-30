@@ -52,3 +52,8 @@ htmlcov/
 # Environment variables
 .env
 .env.local
+
+# Monitoring data
+monitoring/data/
+prometheus_data/
+grafana_data/
