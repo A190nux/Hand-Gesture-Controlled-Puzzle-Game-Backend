@@ -155,8 +155,6 @@ export ENCODER_PATH=/path/to/encoder
 docker-compose --profile production up
 ```
 
-3. **Kubernetes**: See `k8s/` directory (if you want to add k8s configs)
-
 ### Performance Tuning
 
 - **Batch predictions**: Modify API to accept multiple landmark sets
@@ -170,6 +168,9 @@ docker-compose --profile production up
 - **Metrics**: Processing time included in responses
 - **Logs**: Structured logging with timestamps
 - **Docker health checks**: Built-in container health monitoring
+- **Average Prediction Time**: A separate metric for prediction time because response time is not a valid indicator for performance in this case
+- **Confidence and Landmarks Distribution**: To check for data drift and model degredation
+- **CPU and Memory Usage**: For server performance statistics
 
 ## Troubleshooting
 
